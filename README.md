@@ -1,29 +1,27 @@
 # 做一个多智能体的代码审查助手
 
-        ## Must Have
-        - Core multi-agent code review workflow: at least two Python agents (e.g., StyleAgent and BugHunterAgent) that sequentially analyze a pasted code snippet and return a combined review summary via a simple Flask API.
-- Basic static analysis capabilities: integrate lightweight Python linters or AST-based checks (e.g., PEP8/style, unused variables, obvious bugs) that each agent can call to ground its feedback.
-- Clear role separation between agents: define distinct prompts/behaviors (e.g., one focuses on readability and style, another on potential bugs and edge cases) to demonstrate the value of multi-agent collaboration.
-- Minimal web UI in Flask: a single-page form to paste code, trigger review, and display per-agent comments plus an overall consolidated recommendation.
-- Simple architecture and logging: straightforward Python modules for agents with basic logging of each agent’s output for debugging and demo purposes.
-
-        ## Optional
-        - ArchitectAgent that summarizes and comments on code structure, modularity, and potential refactors for maintainability.
-- Knowledge-based suggestions: a small, hard-coded ruleset or FAQ that lets agents suggest best practices (e.g., error handling, input validation, docstrings) based on detected patterns.
-- Basic severity tagging: classify each finding as info/warning/error and group them in the UI for easier scanning.
-- Lightweight diff support: allow users to paste ‘before’ and ‘after’ code and have agents comment on whether the changes improve quality or introduce risks.
-- Simple Slack or webhook integration: send the consolidated review to a channel or URL to simulate CI-style feedback without building full CI/CD.
-
         ## Insights
-        - Focusing on just Python code review keeps scope manageable for beginners and allows reuse of existing linting tools instead of building analyzers from scratch.
-- Distinct, narrow agent roles make the multi-agent aspect visible in the demo and easier to implement than a complex planner/caller system.
-- A text-area based Flask UI is enough to showcase value; investing heavily in frontend or cross-platform deployment will likely hurt progress within 31 hours.
-- Predefining a few example code snippets (good, bad, mixed) will make it easier to test and demo the system under time pressure.
-- Designing the agents as plain Python classes/functions now will make it easier to later plug into more advanced orchestration frameworks if the project continues after the hackathon.
+        - Limit the initial scope to one or two languages (e.g., Python and JavaScript) so you can ship a robust end-to-end multi-agent flow within 64 hours
+- Use a single orchestrator in Flask that fans out the same code payload to each agent function and then merges responses; avoid complex planner/caller hierarchies for the hackathon
+- Design agent outputs with a shared schema (severity, category, line range, message, suggestion) so the frontend can render them consistently and you can add new agents later with minimal changes
+- Start with a paste-or-upload UX instead of full repo analysis; this drastically reduces complexity around parsing, indexing, and performance
+- Prepare a few small sample repos/snippets with known issues to demo how different agents surface complementary insights (style vs. bugs vs. architecture)
 
         ## Warnings
-        - Overly complex multi-agent orchestration (planners, schedulers, dynamic routing) is risky for a 31-hour, beginner-level team and may prevent having a working demo.
-- Trying to support multiple languages or deep architectural analysis (full project understanding, dependency graphs) will likely exceed the time and experience constraints.
-- Building integrations like full CI/CD pipelines, IDE plugins, or enterprise-grade dashboards can quickly consume time without improving the core multi-agent review story.
-- Relying on heavy external services or complex deployments (Kubernetes, edge devices, cross-platform clients) may introduce debugging overhead that beginners struggle to resolve.
-- Insufficient test coverage of the agent logic can lead to confusing or contradictory feedback during the demo; at least a few hard-coded test cases should be run before presenting.
+        - Overly ambitious multi-agent orchestration (dynamic planning, tool-calling chains, long-context reasoning) can consume most of the 64 hours and leave you with a fragile demo
+- Full CI/CD integration, IDE plugins, or deep GitHub App workflows are likely out of scope for a 3-person intermediate team in this timeframe
+- Supporting many languages or complex build systems will require language-specific tooling and may cause frequent failures during the demo
+- Running heavy static analysis tools synchronously on large files can cause timeouts and poor UX; keep file sizes small and provide clear limits
+- Be careful with any auto-fix or code-edit features; incorrect edits can break code and may require more validation logic than you have time to implement
+
+        ## TODO (start here)
+        - [MUST] Core multi-agent code review workflow with at least 2 specialized agents (e.g., StyleAgent and BugRiskAgent) that each take a code snippet + diff as input and return separate analyses
+- [MUST] Web UI (Next.js + minimal Flask backend API) where a user can paste code or upload a file, select language, and see per-agent comments in separate panels
+- [MUST] Basic static checks integrated into one agent (e.g., running flake8 or a simple linter for Python/JS) and surfacing the findings in human-readable form
+- [MUST] SummarizerAgent that aggregates all agent outputs into a concise, prioritized review summary (top issues, suggested fixes)
+- [MUST] Simple project-level context handling: allow user to provide a short README or description that is passed to agents so they can tailor feedback to the repo’s goals
+- [OPTIONAL] ArchitectAgent that focuses on architectural and design-level feedback (modularity, layering, naming, dependency boundaries)
+- [OPTIONAL] LearningAgent that detects recurring mistakes across multiple reviews in a session and suggests a short personalized learning checklist
+- [OPTIONAL] GitHub/Git integration to fetch a specific diff or PR and run the multi-agent review automatically, returning a single review page
+- [OPTIONAL] Inline annotation view that shows agent comments side-by-side with code lines (basic read-only code viewer, no full IDE)
+- [OPTIONAL] Simple configuration panel to toggle which agents are active and adjust their strictness level (e.g., style-only vs. bug-focused)
